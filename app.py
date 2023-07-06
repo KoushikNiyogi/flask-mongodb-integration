@@ -204,7 +204,7 @@ def update_order():
 
     if result.modified_count > 0:
         # Emit the updated status to all connected clients
-        socketio.emit('order_status_changed', {'order_id': order["id"], 'status': request_data["status"]})
+        socketio.emit('order_status_changed', {'order_id': order["id"],"user_id":order["userid"], 'status': request_data["status"]})
         return jsonify({'msg': 'Order status updated successfully'})
     else:
         return jsonify({"msg" : 'Order not found!!'})
