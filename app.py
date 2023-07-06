@@ -1,58 +1,85 @@
-from flask import Flask, render_template, request, redirect, jsonify
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit
+from bson import json_util, ObjectId
 import json
 import uuid
 import os
 import openai
+from dotenv import load_dotenv
 import requests
 from pymongo import MongoClient
+import requests
+import json
+import logging
+from logging.handlers import RotatingFileHandler
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'tea58/BUCK/MAG'
-OPENAI_API_KEY = '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'
+load_dotenv()
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 CORS(app, origins='*')
 
 # Connect to MongoDB Atlas
-client = MongoClient('mongodb+srv://koushik:niyogi@cluster0.wfutoyr.mongodb.net/zomato-flask?retryWrites=true&w=majority')
-db = client["zomato-Flask"]
+MONGO_URL = os.environ.get("MONGO_URL")
+client = MongoClient(MONGO_URL)
+db = client['zomato-Flask']
 menu_collection = db['menu']
 orders_collection = db['orders']
 
+def serialize_docs(docs):
+    serialized_docs = []
+    for doc in docs:
+        doc['_id'] = str(doc['_id'])
+        serialized_docs.append(doc)
+    return serialized_docs
+
+print(OPENAI_API_KEY)
+
+handler = RotatingFileHandler('app.log', maxBytes=10000, backupCount=1)
+handler.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+app.logger.addHandler(handler)
 
 
 def get_chatbot_response(query):
-    """
-    Sends a user query to OpenAI API and retrieves the chatbot's response.
-
-    Args:
-        query (str): User query.
-
-    Returns:
-        str: Chatbot's response.
-
-    """
-    print(query)
-    prompt = f"User: {query}\nChatbot: Hi! How can I assist you today?\nUser: {query}\nChatbot:\n- What are your operation hours?|Our operation hours are from 9 AM to 6 PM.\n- What is the status of my order?|Please provide your order ID, and we will check the status for you.\n- What is your most popular dish?|Our most popular dish is the Spicy Chicken Pasta.\n\nUser:"
-
+    prompt =  prompt = f"Food Delivery Chatbot:\nUser: {query}\nChatbot:"
     payload = {
         'prompt': prompt,
-        'max_tokens': 100
+        'max_tokens': 100,
     }
-
+    
     headers = {
         'Authorization': f'Bearer {OPENAI_API_KEY}',
         'Content-Type': 'application/json'
     }
-
+    
     response = requests.post(
         'https://api.openai.com/v1/engines/text-davinci-003/completions',
         data=json.dumps(payload),
         headers=headers
     )
-
+    
     if response.status_code == 200:
         chatbot_response = response.json()['choices'][0]['text'].strip()
+        if 'operation hours' in query.lower():
+            chatbot_response = "Our operation hours are from 9 AM to 6 PM."
+        elif 'status of my order' in query.lower():
+            chatbot_response = "Please provide your order ID, and we will check the status for you."
+        elif 'popular dish' in query.lower():
+            chatbot_response = "Our most popular dish is the Spicy Chicken Pasta."
+        # Add more custom question keywords and corresponding responses
+        elif 'delivery options' in query.lower():
+            chatbot_response = "We offer multiple delivery options, including standard delivery and express delivery."
+        elif 'payment methods' in query.lower():
+            chatbot_response = "We accept various payment methods such as credit cards, debit cards, and digital wallets."
+        elif 'menu' in query.lower():
+            chatbot_response = "You can find our menu on our website or in the app. It includes a wide range of delicious dishes."
+        # Add more custom question keywords and corresponding responses here
+        else:
+            chatbot_response = "I'm sorry, but I don't have the information you're looking for. Can I help you with anything else?"
         return chatbot_response
     else:
         return "Oops! Something went wrong with the chatbot."
@@ -67,7 +94,8 @@ def display_menu():
 
     """
     menu = list(menu_collection.find())
-    return jsonify({"menu": menu})
+    serialized_menu = serialize_docs(menu)
+    return jsonify({"menu": serialized_menu})
 
 @app.route('/add_dish', methods=['POST'])
 def add_dish():
@@ -132,7 +160,7 @@ def take_order():
 
     """
     request_data = request.get_json()
-
+    print(request_data["id"]);
     dish = menu_collection.find_one({'id': request_data['id']})
     if dish:
         order_id = str(uuid.uuid4())
@@ -140,6 +168,7 @@ def take_order():
             'id': order_id,
             'customer_name': request_data['name'],
             'dishes': request_data['dishes'],
+            'dishid': request_data['id'],
             'price': dish['price'],
             'status': 'Received'
         }
@@ -148,7 +177,7 @@ def take_order():
 
         return jsonify({'msg': 'Order taken successfully'})
     else:
-        return jsonify({"msg" : "Ordered dish is not present at this moment"})
+        return jsonify({"msg" : dish})
 
 @app.route('/update_order', methods=['PATCH'])
 def update_order():
@@ -180,7 +209,8 @@ def review_orders():
 
     """
     orders = list(orders_collection.find())
-    return jsonify({'orders': orders})
+    serialized_orders = serialize_docs(orders)
+    return jsonify({"menu": serialized_orders})
 
 @app.route('/add_review/<order_id>', methods=['PATCH'])
 def add_review(order_id):
@@ -195,14 +225,32 @@ def add_review(order_id):
 
     """
     request_data = request.get_json()
-
-    result = orders_collection.update_one(
-        {'id': order_id},
-        {'$set': {'rating': request_data['rating'], 'review': request_data['review']}}
-    )
-
-    if result.modified_count > 0:
-        return jsonify({'msg': 'Review added successfully'})
+    review = request_data.get('review')
+    rating = request_data.get('rating')
+    order = orders_collection.find_one({'id': order_id})
+    menu = menu_collection.find_one({'id':order['dishid']})
+    if order is not None:
+       if 'reviews' in menu and 'ratings' in menu:
+            menu_collection.update_one(
+                {'id': order["dishid"]},
+                {
+                    '$push': {
+                        'reviews': review,
+                        'ratings': rating
+                    }
+                }
+            )
+       else:
+            menu_collection.update_one(
+                {'id': order["dishid"]},
+                {
+                    '$set': {
+                        'reviews': [review],
+                        'ratings': [rating]
+                    }
+                }
+            )
+       return jsonify({'msg': 'Review added successfully'})
     else:
         return jsonify({"msg" : 'Order not found!!'})
 
