@@ -66,18 +66,18 @@ def get_chatbot_response(query):
     if response.status_code == 200:
         chatbot_response = response.json()['choices'][0]['text'].strip()
         if 'operation hours' in query.lower():
-            chatbot_response = "Our operation hours are from 9 AM to 6 PM."
+            chatbot_response = "What are your operation hours?\n Our operation hours are from 9 AM to 6 PM."
         elif 'status of my order' in query.lower():
-            chatbot_response = "Please provide your order ID, and we will check the status for you."
+            chatbot_response = "What is my order status?\n Please provide your order ID, and we will check the status for you."
         elif 'popular dish' in query.lower():
-            chatbot_response = "Our most popular dish is the Spicy Chicken Pasta."
+            chatbot_response = "What is popular dish here?\n Our most popular dish is the Spicy Chicken Pasta."
         # Add more custom question keywords and corresponding responses
         elif 'delivery options' in query.lower():
-            chatbot_response = "We offer multiple delivery options, including standard delivery and express delivery."
+            chatbot_response = "What are delivery options available here?\n We offer multiple delivery options, including standard delivery and express delivery."
         elif 'payment methods' in query.lower():
-            chatbot_response = "We accept various payment methods such as credit cards, debit cards, and digital wallets."
+            chatbot_response = "What payment methods do you accept?\n We accept various payment methods such as credit cards, debit cards, and digital wallets."
         elif 'menu' in query.lower():
-            chatbot_response = "You can find our menu on our website or in the app. It includes a wide range of delicious dishes."
+            chatbot_response = "What is on the menu?\n You can find our menu on our website or in the app. It includes a wide range of delicious dishes."
         # Add more custom question keywords and corresponding responses here
         else:
             chatbot_response = "I'm sorry, but I don't have the information you're looking for. Can I help you with anything else?"
