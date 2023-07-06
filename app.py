@@ -16,7 +16,7 @@ from logging.handlers import RotatingFileHandler
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'tea58/BUCK/MAG'
+socketio = SocketIO(app)
 load_dotenv()
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 CORS(app, origins='*')
@@ -199,12 +199,12 @@ def update_order():
 
     """
     request_data = request.get_json()
-
+    order = orders_collection.find_one({'id': request_data['id']})
     result = orders_collection.update_one({'id': request_data['id']}, {'$set': {'status': request_data['status']}})
 
     if result.modified_count > 0:
         # Emit the updated status to all connected clients
-
+        socketio.emit('order_status_changed', {'order_id': order["id"], 'status': request_data["status"]})
         return jsonify({'msg': 'Order status updated successfully'})
     else:
         return jsonify({"msg" : 'Order not found!!'})
@@ -285,4 +285,4 @@ def chatbot():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    socketio.run(app)
