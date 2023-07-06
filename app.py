@@ -16,7 +16,7 @@ from logging.handlers import RotatingFileHandler
 
 
 app = Flask(__name__)
-CORS(app, origins='*')
+CORS(app)
 socketio = SocketIO(app)
 load_dotenv()
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
