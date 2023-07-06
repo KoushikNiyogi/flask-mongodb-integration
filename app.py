@@ -179,6 +179,7 @@ def take_order():
             'dishes': request_data['dishes'],
             'dishid': request_data['id'],
             'price': dish['price'],
+            'userid':request_data['userid'],
             'status': 'Received'
         }
 
