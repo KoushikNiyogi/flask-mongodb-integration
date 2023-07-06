@@ -27,6 +27,7 @@ client = MongoClient(MONGO_URL)
 db = client['zomato-Flask']
 menu_collection = db['menu']
 orders_collection = db['orders']
+user_collection = db["users"]
 
 def serialize_docs(docs):
     serialized_docs = []
@@ -96,6 +97,14 @@ def display_menu():
     menu = list(menu_collection.find())
     serialized_menu = serialize_docs(menu)
     return jsonify({"menu": serialized_menu})
+
+
+@app.route('/users', methods=['GET'])
+def display_users():
+    users = list(user_collection.find())
+    serialized_users = serialize_docs(users)
+    return jsonify({"menu": serialized_users})
+   
 
 @app.route('/add_dish', methods=['POST'])
 def add_dish():
