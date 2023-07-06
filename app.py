@@ -238,6 +238,7 @@ def add_review(order_id):
     review = request_data.get('review')
     rating = request_data.get('rating')
     order = orders_collection.find_one({'id': order_id})
+    print(order)
     menu = menu_collection.find_one({'id':order['dishid']})
     if order is not None:
        if 'reviews' in menu and 'ratings' in menu:
