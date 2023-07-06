@@ -80,7 +80,7 @@ def get_chatbot_response(query):
             chatbot_response = "What is on the menu?\n You can find our menu on our website or in the app. It includes a wide range of delicious dishes."
         # Add more custom question keywords and corresponding responses here
         else:
-            chatbot_response = "I'm sorry, but I don't have the information you're looking for. Can I help you with anything else?"
+            chatbot_response = f"{query}?\n I'm sorry, but I don't have the information you're looking for. Can I help you with anything else?"
         return chatbot_response
     else:
         return "Oops! Something went wrong with the chatbot."
