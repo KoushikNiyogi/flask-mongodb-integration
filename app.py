@@ -241,7 +241,7 @@ def add_review(order_id):
     """
     request_data = request.get_json()
     review = request_data.get('review')
-    rating = request_data.get('rating')
+    rating = int(request_data.get('rating'))
     order = orders_collection.find_one({'id': order_id})
     print(order)
     menu = menu_collection.find_one({'id':order['dishid']})
