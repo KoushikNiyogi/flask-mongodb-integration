@@ -105,7 +105,6 @@ def display_users():
     users = list(user_collection.find())
     serialized_users = serialize_docs(users)
     return jsonify({"menu": serialized_users})
-   
 
 @app.route('/add_dish', methods=['POST'])
 def add_dish():
