@@ -17,13 +17,13 @@ from logging.handlers import RotatingFileHandler
 
 app = Flask(__name__)
 CORS(app)
-socketio = SocketIO(app,cors_allowed_origins="*")
 load_dotenv()
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
 
 # Connect to MongoDB Atlas
 MONGO_URL = os.environ.get("MONGO_URL")
+
 client = MongoClient(MONGO_URL)
 db = client['zomato-Flask']
 menu_collection = db['menu']
@@ -170,7 +170,6 @@ def take_order():
 
     """
     request_data = request.get_json()
-    print(request_data["id"]);
     dish = menu_collection.find_one({'id': request_data['id']})
     if dish:
         order_id = str(uuid.uuid4())
@@ -189,6 +188,13 @@ def take_order():
         return jsonify({'msg': 'Order taken successfully'})
     else:
         return jsonify({"msg" : dish})
+    
+@app.route('/remove_order/<id>', methods=['DELETE'])
+def remove_order(id):
+   
+    orders_collection.delete_one({'id': id})
+
+    return jsonify({"msg" : "Order has been removed from the menu successfully!!"})
 
 @app.route('/update_order', methods=['PATCH'])
 def update_order():
@@ -205,7 +211,6 @@ def update_order():
 
     if result.modified_count > 0:
         # Emit the updated status to all connected clients
-        socketio.emit('order_status_changed', {'order_id': order["id"],"user_id":order["userid"], 'status': request_data["status"]})
         return jsonify({'msg': 'Order status updated successfully'})
     else:
         return jsonify({"msg" : 'Order not found!!'})
@@ -286,4 +291,4 @@ def chatbot():
 
 
 if __name__ == '__main__':
-    socketio.run(app)
+    app.run()
