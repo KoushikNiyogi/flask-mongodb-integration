@@ -1,0 +1,42 @@
+2023-07-13 05:10:21,314 - ERROR - Exception on /take_order [POST]
+Traceback (most recent call last):
+  File "C:\Users\hp\Desktop\Geersative Ai\flask-mogodb\flask_mongodb\Lib\site-packages\flask\app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hp\Desktop\Geersative Ai\flask-mogodb\flask_mongodb\Lib\site-packages\flask\app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hp\Desktop\Geersative Ai\flask-mogodb\flask_mongodb\Lib\site-packages\flask_cors\extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hp\Desktop\Geersative Ai\flask-mogodb\flask_mongodb\Lib\site-packages\flask\app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hp\Desktop\Geersative Ai\flask-mogodb\flask_mongodb\Lib\site-packages\flask\app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hp\Desktop\Geersative Ai\flask-mogodb\app.py", line 173, in take_order
+    print(request_data["id"])
+          ~~~~~~~~~~~~^^^^^^
+KeyError: 'id'
+2023-07-13 05:42:50,624 - ERROR - Exception on /add_review/a955b65b-205f-459d-8fcf-3bb3f740b788 [PATCH]
+Traceback (most recent call last):
+  File "C:\Users\hp\Desktop\Geersative Ai\flask-mogodb\flask_mongodb\Lib\site-packages\flask\app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hp\Desktop\Geersative Ai\flask-mogodb\flask_mongodb\Lib\site-packages\flask\app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hp\Desktop\Geersative Ai\flask-mogodb\flask_mongodb\Lib\site-packages\flask_cors\extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hp\Desktop\Geersative Ai\flask-mogodb\flask_mongodb\Lib\site-packages\flask\app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hp\Desktop\Geersative Ai\flask-mogodb\flask_mongodb\Lib\site-packages\flask\app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hp\Desktop\Geersative Ai\flask-mogodb\app.py", line 250, in add_review
+    if 'reviews' in menu and 'ratings' in menu:
+       ^^^^^^^^^^^^^^^^^
+TypeError: argument of type 'NoneType' is not iterable
